@@ -2,7 +2,7 @@
 Display current timeline schedules. This is a plugin module for `MMM-CalendarExt`and `MMM-CalendarExt2`
 
 ## Screenshot ##
-![screenshot](https://raw.githubusercontent.com/eouia/MMM-CalendarExtTimeline/master/timeline_static.jpg)
+![screenshot](https://raw.githubusercontent.com/MagicMirrorModules/MMM-CalendarExtTimeline/master/timeline_static.jpg)
 
 ## Installation ##
 **`MMM-CalendarExt` should be installed together for using this module.**
@@ -11,7 +11,7 @@ Display current timeline schedules. This is a plugin module for `MMM-CalendarExt
 
 ```shell
 cd <your MagicMirror Directory>/modules
-git clone https://github.com/eouia/MMM-CalendarExtTimeline
+git clone https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline
 ```
 
 ## Update ##
@@ -59,7 +59,7 @@ If current time be 13:45, This would show schedules which goes from 13:00 to 19:
 `begin_hour` will be ignored when type is set to `dynamic`.
 
 ### transform
-See [Transforming in MMM-CalendarExt2](https://github.com/MMM-CalendarExt2/MMM-CalendarExt2/blob/master/docs/Filtering-and-Sorting.md#transforming). A `transform` key can be added to the MMM-CalendarExtTimeline config in the same way, for example:
+See [Transforming in MMM-CalendarExt2](https://github.com/MagicMirrorModules/MMM-CalendarExt2/blob/master/docs/Filtering-and-Sorting.md#transforming). A `transform` key can be added to the MMM-CalendarExtTimeline config in the same way, for example:
 
 ```javascript
 transform: (event) => {
