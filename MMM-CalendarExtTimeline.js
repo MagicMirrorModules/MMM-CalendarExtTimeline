@@ -1,16 +1,37 @@
-/* Magic Mirror
-* Module: MMM-CalendarExtTimeline
-*
-* By eouia
-*/
+var TimelineUtils = {}
 
-var CALEXTTL = {}
-
-CALEXTTL.round = function(number, precision) {
+TimelineUtils.round = function(number, precision) {
 	var factor = Math.pow(10, precision)
 	var tempNumber = number * factor
 	var roundedTempNumber = Math.round(tempNumber)
 	return roundedTempNumber / factor
+}
+
+TimelineUtils.readableTextColor = function(color) {
+	if (typeof color !== "string") {
+		return "#111"
+	}
+
+	var hex = color.trim()
+	if (hex[0] === "#") {
+		hex = hex.substring(1)
+	}
+
+	if (hex.length === 3) {
+		hex = hex.split("").map(function(ch) {
+			return ch + ch
+		}).join("")
+	}
+
+	if (/^[0-9a-fA-F]{6}$/.test(hex)) {
+		var r = parseInt(hex.substring(0, 2), 16)
+		var g = parseInt(hex.substring(2, 4), 16)
+		var b = parseInt(hex.substring(4, 6), 16)
+		var luminance = (0.299 * r) + (0.587 * g) + (0.114 * b)
+		return luminance > 160 ? "#111" : "#fff"
+	}
+
+	return "#111"
 }
 
 Module.register("MMM-CalendarExtTimeline",{
@@ -24,7 +45,7 @@ Module.register("MMM-CalendarExtTimeline",{
 		time_display_section_count: 6,
 		time_display_section_format: "hh:mm a",
 		calendars: [],
-		source: "CALEXT2", // "CALEXT" or "CALEXT2"
+		source: "CALENDAR", // "CALENDAR" or "CALEXT2"
 	},
 
 	start: function() {
@@ -58,8 +79,8 @@ Module.register("MMM-CalendarExtTimeline",{
 		)
 
 		var wrapper = document.createElement("div")
-		wrapper.className = "CALEXT CEXTML timeline"
-		wrapper.id = "CALEXT_TIMELINE"
+		wrapper.className = "timeline timelineModule"
+		wrapper.id = "MMM-CalendarExtTimeline"
 		var frameTable = document.createElement("table")
 		frameTable.className = "frameTable"
 
@@ -98,7 +119,7 @@ Module.register("MMM-CalendarExtTimeline",{
 			curTimeline.className = "current_timeline"
 			var gap = this.endTime.diff(this.startTime, "seconds")
 			var curgap = curTime.diff(this.startTime, "seconds")
-			var position = CALEXTTL.round(curgap * 100/gap, 2)
+			var position = TimelineUtils.round(curgap * 100/gap, 2)
 			curTimeline.style.left = position + "%"
 			headerTimeCell.appendChild(curTimeline)
 		}
@@ -135,21 +156,18 @@ Module.register("MMM-CalendarExtTimeline",{
 	},
 
 	notificationReceived: function(notification, payload, sender) {
+		if (notification == "CALENDAR_EVENTS") {
+			this.updateContentFromCalendarEvents(payload)
+		}
 		if (notification == "DOM_OBJECTS_CREATED") {
 			this.updateDom()
 			var self = this
 			setInterval(function(){
+				if (self.config.source == "CALEXT2") {
+					self.updateRequest2()
+				}
 				self.updateDom()
 			}, this.config.refresh_interval_sec * 1000)
-		}
-		if (notification == "CALEXT_SAYS_CALENDAR_MODIFIED") {
-			var self = this
-			setTimeout(function(){
-				self.updateRequest()
-			}, 1000)
-		}
-		if (notification == "CALEXT_SAYS_SCHEDULE") {
-			this.updateContent(payload)
 		}
 
 		if (notification == "CALEXT2_CALENDAR_MODIFIED") {
@@ -216,7 +234,6 @@ Module.register("MMM-CalendarExtTimeline",{
 				}
 			}
 		})
-		console.log(stack)
 		stack.forEach(function(s) {
 			var line = document.createElement("div")
 			line.className = "eventPositionLine"
@@ -231,14 +248,22 @@ Module.register("MMM-CalendarExtTimeline",{
 					eEnd = moment(endTime)
 				}
 				var gap = eEnd.format("x") - eStart.format("x")
-				var width = CALEXTTL.round(gap * 100 / totalGap, 2) + "%"
+				var width = TimelineUtils.round(gap * 100 / totalGap, 2) + "%"
 
 				var startPosition = eStart.format("x") - startTime.format("x")
-				var position = CALEXTTL.round(startPosition * 100 / totalGap, 2) + "%"
+				var position = TimelineUtils.round(startPosition * 100 / totalGap, 2) + "%"
 
 				var ev = document.createElement("div")
 				ev.className = "event "
 				ev.className += e.styleName
+				if (e.color) {
+					ev.style.backgroundColor = e.color
+					ev.style.borderColor = e.color
+					ev.style.color = TimelineUtils.readableTextColor(e.color)
+				}
+				if (e.bgColor) {
+					ev.style.backgroundColor = e.bgColor
+				}
 				ev.style.width = width
 				ev.style.left = position
 				ev.innerHTML = e.title
@@ -273,20 +298,51 @@ Module.register("MMM-CalendarExtTimeline",{
 			this.updateDom()
 		}
 	},
-	updateRequest: function() {
-		var filter = {
-		  names: this.names,
-			from: moment().startOf('day').format('x'),
-		  to: moment().endOf('day').format('x'),
-		  count: 100
+	updateContentFromCalendarEvents: function(events) {
+		if (!Array.isArray(events)) {
+			return
 		}
-		var payload = {
-		  filter: filter,
-		  sessionId: moment().format('x')
+		var configuredNames = Array.isArray(this.config.calendars) ? this.config.calendars.slice() : []
+		var discoveredNames = []
+		this.events = events
+			.map(function(event) {
+				var calendarName = event.calendarName || event.name || "calendar"
+				var startDate = parseInt(event.startDate, 10)
+				var endDate = parseInt(event.endDate, 10)
+				if (discoveredNames.indexOf(calendarName) < 0) {
+					discoveredNames.push(calendarName)
+				}
+				return {
+					name: calendarName,
+					title: event.title,
+					startDate: startDate,
+					endDate: endDate,
+					fullDayEvent: !!event.fullDayEvent,
+					styleName: event.styleName || "",
+					color: event.color || "",
+					bgColor: event.bgColor || ""
+				}
+			})
+			.filter(function(event) {
+				return event.name && event.title && Number.isFinite(event.startDate) && Number.isFinite(event.endDate)
+			})
+		if (this.config.source == "CALENDAR") {
+			this.names = configuredNames.length > 0 ? configuredNames : (discoveredNames.length > 0 ? discoveredNames : ["calendar"])
+			discoveredNames.forEach((name) => {
+				if (this.names.indexOf(name) < 0) {
+					this.names.push(name)
+				}
+			})
 		}
-		this.sendNotification("CALEXT_TELL_SCHEDULE", payload)
+		this.events.sort(function(a, b){
+			if (a.startDate == b.startDate) {
+				return a.endDate - b.endDate
+			} else {
+				return a.startDate - b.startDate
+			}
+		})
+		this.updateDom()
 	},
-
 	updateRequest2: function() {
 		var payload = {
 			filter: (e) => {

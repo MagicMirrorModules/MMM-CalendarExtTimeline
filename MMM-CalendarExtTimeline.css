@@ -1,12 +1,12 @@
-.CEXTML {
+.timelineModule {
   line-height:1em;
 }
 
-.CEXTML *{
+.timelineModule *{
   box-sizing:border-box;
 }
 
-.CEXTML .current_timeline {
+.timelineModule .current_timeline {
   width:0px;
   height:24px;
   position:absolute;
@@ -14,14 +14,14 @@
   top:10px;
 }
 
-.CEXTML .holder {
+.timelineModule .holder {
   position:relative;
   width:100%;
   height:100%;
 
 }
 
-.CEXTML .eventPositionLine {
+.timelineModule .eventPositionLine {
   position:relative;
   width:100%;
   height:24px;
@@ -29,27 +29,37 @@
   margin:1px 0;
 }
 
-.CEXTML .event {
+.timelineModule .event {
   position:absolute;
   height:24px;
   font-size:14px;
   line-height:24px;
   overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
   padding-left:6px;
+  padding-right:6px;
   text-align:left;
 }
 
-.CEXTML .event.startHere {
+.timelineModule .event.startHere {
+  border-left:3px solid currentColor;
   border-top-left-radius:12px;
   border-bottom-left-radius:12px;
 }
 
-.CEXTML .event.endHere {
+.timelineModule .event.endHere {
+  border-right:3px solid currentColor;
   border-top-right-radius:12px;
   border-bottom-right-radius:12px;
 }
 
-.CEXTML .timeCol td {
+.timelineModule .event.startHere.endHere {
+  border-left:3px solid currentColor;
+  border-right:3px solid currentColor;
+}
+
+.timelineModule .timeCol td {
   padding:0;
   margin:0;
   text-align:left;
@@ -57,18 +67,18 @@
   border-left:1px solid #999;
 }
 
-.CEXTML .timeCol table {
+.timelineModule .timeCol table {
   position:relative;
   height:24px;
   overflow: hidden;
 }
 
-.CEXTML .timeCol p {
+.timelineModule .timeCol p {
   padding:0;
   margin:0;
 }
 
-.CEXTML th.timeCol {
+.timelineModule th.timeCol {
   width:90%;
   font-weight:normal;
   font-size:initial;
@@ -77,7 +87,7 @@
   height:24px;
 }
 
-.CEXTML th.titleCol {
+.timelineModule th.titleCol {
   max-width:10%;
   font-weight:normal;
   font-size:initial;
@@ -85,7 +95,7 @@
   height:24px;
 }
 
-.CEXTML td.schedules {
+.timelineModule td.schedules {
   width:90%;
   font-weight:normal;
   font-size:initial;
@@ -94,7 +104,7 @@
 }
 
 
-.CEXTML td.calendar {
+.timelineModule td.calendar {
   max-width:10%;
   font-weight:normal;
   font-size:initial;
