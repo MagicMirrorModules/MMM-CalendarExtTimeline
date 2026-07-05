@@ -31,12 +31,12 @@ git clone https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline
     end_hour: 6, // how many hours to show
     fromNow: 0, // add this many days to today's current date, e.g., 1 is tomorrow, -1 is yesterday
     time_display_section_count: 6,
-    time_display_section_format: "HH:mm",
     calendars: ["your calendar name", "another name"], // calendar.name values or CalendarExt2 names
     source: "CALENDAR" // or "CALEXT2"
   }
 },
 ```
+Time labels follow MagicMirror's global `timeFormat` setting (12/24h).
 For the built-in `calendar` module, make sure the calendar entry has a `name` and `broadcastEvents: true`, for example:
 
 ```javascript

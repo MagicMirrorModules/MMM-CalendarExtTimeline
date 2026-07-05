@@ -34,6 +34,28 @@ TimelineUtils.readableTextColor = function(color) {
 	return "#111"
 }
 
+TimelineUtils.formatByPattern = function(date, pattern, locale) {
+	var lang = locale || "en-US"
+	var pad = function(n) { return String(n).padStart(2, "0") }
+	var day = date.getDate()
+	var suffix = "th"
+	if (day < 11 || day > 13) {
+		suffix = { 1: "st", 2: "nd", 3: "rd" }[day % 10] || "th"
+	}
+	var tokens = {
+		dddd: new Intl.DateTimeFormat(lang, { weekday: "long" }).format(date),
+		ddd: new Intl.DateTimeFormat(lang, { weekday: "short" }).format(date),
+		MMMM: new Intl.DateTimeFormat(lang, { month: "long" }).format(date),
+		MMM: new Intl.DateTimeFormat(lang, { month: "short" }).format(date),
+		Do: day + suffix,
+		DD: pad(day),
+		D: String(day)
+	}
+	return String(pattern || "").replace(/dddd|MMMM|ddd|MMM|Do|DD|D/g, function(token) {
+		return tokens[token] || token
+	})
+}
+
 Module.register("MMM-CalendarExtTimeline",{
 	defaults: {
 		type: "static", // "static", "dynamic"
@@ -43,7 +65,6 @@ Module.register("MMM-CalendarExtTimeline",{
 		end_hour: 20,
 		fromNow: 0,
 		time_display_section_count: 6,
-		time_display_section_format: "hh:mm a",
 		calendars: [],
 		source: "CALENDAR", // "CALENDAR" or "CALEXT2"
 	},
@@ -60,21 +81,28 @@ Module.register("MMM-CalendarExtTimeline",{
 		return ["MMM-CalendarExtTimeline.css"]
 	},
 
-	getScripts: function () {
-		return ["moment.js"];
-	},
-
 	getDom: function() {
+		var lang = (typeof config !== "undefined" && config.language) ? config.language : "en-US"
+		var is24Hour = config && Number(config.timeFormat) === 24
+		var titleFormatter = new Intl.DateTimeFormat(lang, { weekday: "short", month: "short", day: "numeric" })
+		var timeFormatter = new Intl.DateTimeFormat(lang, { hour: "2-digit", minute: "2-digit", hour12: !is24Hour })
+		var titleFormatPattern = this.config.table_title_format
+
 		if (this.config.type == "dynamic") {
-			this.startTime = moment().startOf("hour")
-			this.endTime = moment().startOf("hour")
-				.add(this.config.end_hour, "hours").startOf("hour")
+			this.startTime = new Date()
+			this.startTime.setMinutes(0, 0, 0)
+			this.endTime = new Date(this.startTime)
+			this.endTime.setHours(this.endTime.getHours() + this.config.end_hour)
 		} else {
-			this.startTime = moment().hour(this.config.begin_hour).startOf("hour").add(this.config.fromNow, "days")
-			this.endTime = moment().hour(this.config.end_hour).startOf("hour").add(this.config.fromNow, "days")
+			this.startTime = new Date()
+			this.startTime.setHours(this.config.begin_hour, 0, 0, 0)
+			this.startTime.setDate(this.startTime.getDate() + this.config.fromNow)
+			this.endTime = new Date()
+			this.endTime.setHours(this.config.end_hour, 0, 0, 0)
+			this.endTime.setDate(this.endTime.getDate() + this.config.fromNow)
 		}
 		this.hour_diff_sec = Math.round(
-			this.endTime.diff(this.startTime, "seconds")
+			((this.endTime - this.startTime) / 1000)
 			/ this.config.time_display_section_count
 		)
 
@@ -87,7 +115,11 @@ Module.register("MMM-CalendarExtTimeline",{
 		var frameHeader = document.createElement("thead")
 		var frameHeaderRow = document.createElement("tr")
 		var headerTitleCell = document.createElement("th")
-		headerTitleCell.innerHTML = this.startTime.format(this.config.table_title_format)
+		var resolvedTitle = titleFormatter.format(this.startTime)
+		if (typeof titleFormatPattern === "string" && titleFormatPattern.trim() !== "") {
+			resolvedTitle = TimelineUtils.formatByPattern(this.startTime, titleFormatPattern, lang) || resolvedTitle
+		}
+		headerTitleCell.textContent = resolvedTitle
 		headerTitleCell.className = "titleCol"
 		var headerTimeCell = document.createElement("th")
 		headerTimeCell.className = "timeCol"
@@ -99,26 +131,25 @@ Module.register("MMM-CalendarExtTimeline",{
 		var httr = document.createElement("tr")
 
 		var i = 0
-		var st = this.startTime
+		var st = new Date(this.startTime)
 		for(i=0; i<this.config.time_display_section_count; i++) {
 			var td = document.createElement("td")
 			var p = document.createElement("p")
-			p.innerHTML
-				= moment(st).format(this.config.time_display_section_format)
-			st = moment(st).add(this.hour_diff_sec, "seconds")
+			p.innerHTML = timeFormatter.format(st)
+			st = new Date(st.getTime() + this.hour_diff_sec * 1000)
 			td.appendChild(p)
 			httr.appendChild(td)
 		}
 		hourTable.appendChild(httr)
 		headerTimeCell.appendChild(hourTable)
 
-		var curTime = moment()
+		var curTime = new Date()
 
-		if (curTime.isBetween(this.startTime, this.endTime)) {
+		if (curTime >= this.startTime && curTime <= this.endTime) {
 			curTimeline = document.createElement("div")
 			curTimeline.className = "current_timeline"
-			var gap = this.endTime.diff(this.startTime, "seconds")
-			var curgap = curTime.diff(this.startTime, "seconds")
+			var gap = (this.endTime - this.startTime) / 1000
+			var curgap = (curTime - this.startTime) / 1000
 			var position = TimelineUtils.round(curgap * 100/gap, 2)
 			curTimeline.style.left = position + "%"
 			headerTimeCell.appendChild(curTimeline)
@@ -179,9 +210,9 @@ Module.register("MMM-CalendarExtTimeline",{
 	},
 
 	makeEvents: function(name, parentDom) {
-		var startTime = moment(this.startTime)
-		var endTime = moment(this.endTime)
-		var totalGap = endTime.format("x") - startTime.format("x")
+		var startMs = this.startTime.getTime()
+		var endMs = this.endTime.getTime()
+		var totalGap = endMs - startMs
 		var events = []
 		var stack = [[]]
 		var self = this
@@ -189,18 +220,18 @@ Module.register("MMM-CalendarExtTimeline",{
 			var eName = e.name
 			if (eName) {
 				if (eName == name) {
-					var eStart = moment.unix(e.startDate / 1000)
-					var eEnd = moment.unix(e.endDate / 1000)
+					var eStart = e.startDate
+					var eEnd = e.endDate
 					var isValid = false
-					if (eStart.isBetween(startTime, endTime, "minute", "[)")) {
+					if (eStart >= startMs && eStart < endMs) {
 						e.startInView = true
 						isValid = true
 					}
-					if (eEnd.isBetween(startTime, endTime, "minute", "(]")) {
+					if (eEnd > startMs && eEnd <= endMs) {
 						e.endInView = true
 						isValid = true
 					}
-					if (eStart.isSameOrBefore(startTime) && eEnd.isSameOrAfter(endTime)) {
+					if (eStart <= startMs && eEnd >= endMs) {
 						e.overView = true
 						isValid = true
 					}
@@ -211,9 +242,7 @@ Module.register("MMM-CalendarExtTimeline",{
 							var fitToStack = true
 							for(var i=0; i<s.length; i++) {
 								var ee = s[i]
-								var eeStart = moment.unix(ee.startDate / 1000)
-								var eeEnd = moment.unix(ee.endDate / 1000)
-								var isCrossed = !(eStart.isAfter(eeEnd) || eEnd.isBefore(eeStart))
+								var isCrossed = !(eStart > ee.endDate || eEnd < ee.startDate)
 								if (isCrossed) {
 									fitToStack = false
 									break
@@ -239,18 +268,18 @@ Module.register("MMM-CalendarExtTimeline",{
 			line.className = "eventPositionLine"
 			if (self.config.source == "CALEXT2") line.className += " CX2"
 			s.forEach(function(e) {
-				var eStart = moment.unix(e.startDate / 1000)
-				var eEnd = moment.unix(e.endDate / 1000)
-				if (eStart.isBefore(startTime)) {
-					eStart = moment(startTime)
+				var eStart = e.startDate
+				var eEnd = e.endDate
+				if (eStart < startMs) {
+					eStart = startMs
 				}
-				if (eEnd.isAfter(endTime)) {
-					eEnd = moment(endTime)
+				if (eEnd > endMs) {
+					eEnd = endMs
 				}
-				var gap = eEnd.format("x") - eStart.format("x")
+				var gap = eEnd - eStart
 				var width = TimelineUtils.round(gap * 100 / totalGap, 2) + "%"
 
-				var startPosition = eStart.format("x") - startTime.format("x")
+				var startPosition = eStart - startMs
 				var position = TimelineUtils.round(startPosition * 100 / totalGap, 2) + "%"
 
 				var ev = document.createElement("div")
@@ -346,8 +375,14 @@ Module.register("MMM-CalendarExtTimeline",{
 	updateRequest2: function() {
 		var payload = {
 			filter: (e) => {
-				var from = moment().startOf("day").add(this.config.fromNow, 'days').format("X")
-				var to = moment().endOf("day").add(this.config.fromNow, 'days').format("X")
+				var fromDate = new Date()
+				fromDate.setHours(0, 0, 0, 0)
+				fromDate.setDate(fromDate.getDate() + this.config.fromNow)
+				var toDate = new Date()
+				toDate.setHours(23, 59, 59, 999)
+				toDate.setDate(toDate.getDate() + this.config.fromNow)
+				var from = Math.floor(fromDate.getTime() / 1000)
+				var to = Math.floor(toDate.getTime() / 1000)
 				if (this.names.indexOf(e.calendarName) < 0) return false
 				if (e.startDate > to || e.endDate < from) return false
 				return true

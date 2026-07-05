@@ -42,7 +42,6 @@ const config = {
         end_hour: 23,
         fromNow: 0,
         time_display_section_count: 12,
-        time_display_section_format: "HH:mm",
         calendars: ["mull", "test"],
         source: "CALENDAR"
       }
