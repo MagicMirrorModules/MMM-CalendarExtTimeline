@@ -1,0 +1,19 @@
+{
+  "name": "mmm-calendarexttimeline",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "description": "Timeline view module of MagicMirror².",
+  "main": "MMM-CalendarExtTimeline.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline.git"
+  },
+  "keywords": [
+    "magicmirror",
+    "calendar",
+    "timeline"
+  ],
+  "scripts": {
+    "demo": "cd ../../ && MM_CONFIG_FILE=modules/MMM-CalendarExtTimeline/demo.config.js node --run start:dev"
+  }
+}
