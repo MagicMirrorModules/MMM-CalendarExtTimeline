@@ -16,11 +16,13 @@
   "scripts": {
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "demo": "cd ../../ && MM_CONFIG_FILE=modules/MMM-CalendarExtTimeline/demo.config.js node --run start:dev"
+    "demo": "cd ../../ && MM_CONFIG_FILE=modules/MMM-CalendarExtTimeline/demo.config.js node --run start:dev",
+    "release": "commit-and-tag-version --config ./changelog.config.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
+    "commit-and-tag-version": "^12.7.3",
     "eslint": "^10.6.0",
     "globals": "^17.7.0"
   }
