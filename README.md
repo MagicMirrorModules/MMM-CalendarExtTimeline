@@ -107,3 +107,14 @@ transform: (event) => {
   return event
 },
 ```
+
+For `MMM-CalendarExt2` events, `transform` can also set `event.color` to control the background and text contrast, or `event.bgColor` to set only the background. Derive the color from event data to keep it stable across refreshes, for example:
+
+```javascript
+transform: (event) => {
+  const colors = ["#c62828", "#1565c0", "#2e7d32"]
+  const day = new Date(event.startDate).getDate()
+  event.color = colors[day % colors.length]
+  return event
+},
+```
