@@ -5,7 +5,7 @@ import stylistic from "@stylistic/eslint-plugin";
 
 export default defineConfig([
   {
-    files: ["**/*.js"],
+    files: ["**/*.{js,cjs}"],
     languageOptions: {
       ecmaVersion: "latest",
       globals: {
