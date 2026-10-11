@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.0.1](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/compare/v2.0.0...v2.0.1) (2026-10-11)
+
+### Fixed
+
+* **timeline:** include next-day CALEXT2 events ([1048a66](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/1048a662650a2fd502c9df32fa45ca722fff6bf6))
+* **timeline:** share rows for adjacent events ([c2b2fe8](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/c2b2fe8dc486a36432690380b43fbb217b8d2199))
+
+### Documentation
+
+* add update section to README ([d54cbcc](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/d54cbcc297a7c0594828920252430e83b7c89e41))
+* clarify calendar source setup ([8418333](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/8418333c284f56b68d91f19f4a7436510c99d49d))
+* explain event color transforms ([a50eea6](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/a50eea6470265dc305715e1f1487e49d4c3e739c))
+
+### Chores
+
+* add missing license field in package.json ([995c904](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/995c904d5b02e8bfbb0c5e7691024e6a679b59b8))
+* **deps-dev:** bump commit-and-tag-version from 12.7.3 to 13.1.0 ([91b2478](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/91b2478b54a9df4da35284e6830055b47739184f))
+* **deps-dev:** bump commit-and-tag-version from 13.1.0 to 13.1.2 ([2440970](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/24409709a8f302cf5d0513467c1acb1e73a63eaf))
+* **deps-dev:** bump eslint from 10.6.0 to 10.7.0 ([79782d5](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/79782d58e0251ca90e7b9ca364f3fcc73992afe3))
+* **deps-dev:** bump eslint from 10.7.0 to 10.8.0 ([1433623](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/1433623ae2263707d45dd1950730abd21fabbcb1))
+* **deps-dev:** bump fast-xml-parser from 5.9.3 to 5.10.1 ([d1fcb80](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/d1fcb80bb5b9e57993496b8f55d4bd14a69f26b9))
+* **deps-dev:** bump globals from 17.7.0 to 17.8.0 ([68b423f](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/68b423f5593033499c2c4b50ee0741cb2fc00d24))
+* **deps-dev:** bump globals from 17.8.0 to 17.9.0 ([5254673](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/5254673bff9ea8e267aadbf7a8439cefa13c1529))
+* **deps-dev:** bump globals from 17.9.0 to 17.11.0 ([019202b](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/019202b56e49962530a4dececaf0ee945561199a))
+* **deps:** bump brace-expansion ([67352ec](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/67352ec3818f0632396d02c5718c1a9125bf12ab))
+* update devDependencies ([9120aea](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/9120aea90a67bfa36344fce8bfb1edcb26090e99))
+
+### Tests
+
+* add date and layout coverage ([bb4cccf](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/commit/bb4cccfffde8f6b2421f94dcb9ea22728fce669c))
+
 ## [2.0.0](https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline/compare/v1.0.0...v2.0.0) (2026-07-05)
 
 
