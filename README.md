@@ -44,6 +44,13 @@ git pull
 },
 ```
 Time labels follow MagicMirror's global `timeFormat` setting (12/24h).
+
+### Using MMM-CalendarExt2 as a source
+
+To use `MMM-CalendarExt2` only as a data source, keep its `calendars` configured but omit its `views` option to hide its own display. Keep `MMM-CalendarExt2` enabled, and set this module's `source` to `"CALEXT2"`; CalendarExt2 will still provide events to the timeline.
+
+### Using the built-in calendar as a source
+
 For the built-in `calendar` module, make sure the calendar entry has a `name` and `broadcastEvents: true`, for example:
 
 ```javascript
