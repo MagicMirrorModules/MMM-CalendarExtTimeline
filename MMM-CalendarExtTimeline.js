@@ -79,6 +79,26 @@ Module.register('MMM-CalendarExtTimeline', {
     return ['MMM-CalendarExtTimeline.css']
   },
 
+  getTimeRange() {
+    const startTime = new Date()
+    let endTime
+
+    if (this.config.type == 'dynamic') {
+      startTime.setMinutes(0, 0, 0)
+      endTime = new Date(startTime)
+      endTime.setHours(endTime.getHours() + this.config.end_hour)
+    }
+    else {
+      startTime.setHours(this.config.begin_hour, 0, 0, 0)
+      startTime.setDate(startTime.getDate() + this.config.fromNow)
+      endTime = new Date()
+      endTime.setHours(this.config.end_hour, 0, 0, 0)
+      endTime.setDate(endTime.getDate() + this.config.fromNow)
+    }
+
+    return { startTime, endTime }
+  },
+
   getDom() {
     const lang = (typeof config !== 'undefined' && config.language) ? config.language : 'en-US'
     const is24Hour = config && Number(config.timeFormat) === 24
@@ -86,20 +106,9 @@ Module.register('MMM-CalendarExtTimeline', {
     const timeFormatter = new Intl.DateTimeFormat(lang, { hour: '2-digit', minute: '2-digit', hour12: !is24Hour })
     const titleFormatPattern = this.config.table_title_format
 
-    if (this.config.type == 'dynamic') {
-      this.startTime = new Date()
-      this.startTime.setMinutes(0, 0, 0)
-      this.endTime = new Date(this.startTime)
-      this.endTime.setHours(this.endTime.getHours() + this.config.end_hour)
-    }
-    else {
-      this.startTime = new Date()
-      this.startTime.setHours(this.config.begin_hour, 0, 0, 0)
-      this.startTime.setDate(this.startTime.getDate() + this.config.fromNow)
-      this.endTime = new Date()
-      this.endTime.setHours(this.config.end_hour, 0, 0, 0)
-      this.endTime.setDate(this.endTime.getDate() + this.config.fromNow)
-    }
+    const { startTime, endTime } = this.getTimeRange()
+    this.startTime = startTime
+    this.endTime = endTime
     this.hour_diff_sec = Math.round(
       ((this.endTime - this.startTime) / 1000)
       / this.config.time_display_section_count,
@@ -368,16 +377,11 @@ Module.register('MMM-CalendarExtTimeline', {
     this.updateDom()
   },
   updateRequest2() {
+    const { startTime, endTime } = this.getTimeRange()
+    const from = Math.floor(startTime.getTime() / 1000)
+    const to = Math.floor(endTime.getTime() / 1000)
     const payload = {
       filter: (e) => {
-        const fromDate = new Date()
-        fromDate.setHours(0, 0, 0, 0)
-        fromDate.setDate(fromDate.getDate() + this.config.fromNow)
-        const toDate = new Date()
-        toDate.setHours(23, 59, 59, 999)
-        toDate.setDate(toDate.getDate() + this.config.fromNow)
-        const from = Math.floor(fromDate.getTime() / 1000)
-        const to = Math.floor(toDate.getTime() / 1000)
         if (this.names.indexOf(e.calendarName) < 0) { return false }
         if (e.startDate > to || e.endDate < from) { return false }
         return true

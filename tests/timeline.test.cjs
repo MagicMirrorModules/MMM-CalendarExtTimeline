@@ -20,9 +20,10 @@ const createElement = tagName => ({
   tagName,
 })
 
-const loadModule = (config = {}) => {
+const loadModule = (config = {}, DateConstructor = Date) => {
   let definition
   const context = {
+    Date: DateConstructor,
     document: { createElement },
     Module: {
       register: (_name, moduleDefinition) => {
@@ -116,4 +117,36 @@ test('overlapping events stack and clip to the visible window', () => {
   assert.equal(parent.children[0].children[0].style.width, '50%')
   assert.equal(parent.children[1].children[0].style.left, '25%')
   assert.equal(parent.children[1].children[0].style.width, '75%')
+})
+
+test('dynamic CalendarExt2 query includes events after midnight', () => {
+  const now = new Date(2024, 0, 1, 23, 30).getTime()
+  class FixedDate extends Date {
+    constructor(...args) {
+      super(...(args.length > 0 ? args : [now]))
+    }
+
+    static now() {
+      return now
+    }
+  }
+  const { module } = loadModule({
+    calendars: ['Work'],
+    end_hour: 24,
+    fromNow: 0,
+    source: 'CALEXT2',
+    type: 'dynamic',
+  }, FixedDate)
+  let query
+  module.names = ['Work']
+  module.sendNotification = (_notification, payload) => { query = payload }
+
+  module.updateRequest2()
+
+  const nextDayStart = new Date(2024, 0, 2, 1).getTime() / 1000
+  assert.equal(query.filter({
+    calendarName: 'Work',
+    endDate: nextDayStart + 1800,
+    startDate: nextDayStart,
+  }), true)
 })
