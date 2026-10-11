@@ -239,7 +239,7 @@ Module.register('MMM-CalendarExtTimeline', {
               let fitToStack = true
               for (let i = 0; i < s.length; i++) {
                 const ee = s[i]
-                const isCrossed = !(eStart > ee.endDate || eEnd < ee.startDate)
+                const isCrossed = !(eStart >= ee.endDate || eEnd <= ee.startDate)
                 if (isCrossed) {
                   fitToStack = false
                   break
