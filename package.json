@@ -4,6 +4,7 @@
   "type": "commonjs",
   "description": "Timeline view module of MagicMirror².",
   "main": "MMM-CalendarExtTimeline.js",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline.git"
