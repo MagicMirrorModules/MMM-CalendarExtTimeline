@@ -17,6 +17,13 @@ cd ~/MagicMirror/modules
 git clone https://github.com/MagicMirrorModules/MMM-CalendarExtTimeline
 ```
 
+## Update
+
+```shell
+cd ~/MagicMirror/modules/MMM-CalendarExtTimeline
+git pull
+```
+
 ## Configuration
 
 ```javascript
